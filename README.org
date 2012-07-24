@@ -1,0 +1,6 @@
+
+* Dem O's
+
+  This repository implements a simple dynamical system to model a
+  binary character's relationship to speciation and extinction events.
+  More news as events warrant.
