@@ -1,34 +1,36 @@
+debug <- FALSE
+if.debugging <- function(x)ifelse(debug,x,NULL)
+
 model <- function(lambda.r,lambda.y,mu.r,mu.y,tau.yr,tau.ry){
   #Given a list of parameters, return a function RY(t) which returns a
   #column matrix c(R(t),Y(t)) representing the sizes of the
   #sub-populations R and Y at time t.
-
-  dr/dt =
-                                        #ar + by dy/dt = cr + dy
+  #dr/dt = ar + by
+  #dy/dt = cr + dy
   a <- lambda.r - mu.r - tau.ry
   b <- tau.yr 
   c <- tau.ry
   d <- lambda.y - mu.y - tau.yr
   A <- matrix(c(a,c,b,d),nrow=2)
-  ## print(A)
+                                        #NB: assumes A is non-singular,
+                                        #b and c != 0
+  ry0 <- oriole.init.state
+  if.debugging(print(A))
   tr <- a + d
   deter <- a*d - b*c
-  #discriminant <- tr^2 - 4 * deter
-  ry0 <- oriole.init.state
-  #take this out if not debugging!
-  ## eigen.sol <- eigen(A)
-  ## print(eigen.sol)
+  #compute eigenvalues, eigenvectors:
   l1 <- tr/2 + sqrt((tr^2)/4 -deter)
   l2 <- tr/2 - sqrt((tr^2)/4 -deter)
   v1 <- c(1, (sqrt(d^2 - 2*a*d + 4*b*c+a^2) + d - a)/(2*b))
   v2 <- c(1,-(sqrt(d^2 - 2*a*d + 4*b*c+a^2) - d + a)/(2*b))
-  #Lambda <- diag(c(l1,l2))
+  if.debugging(print(eigen(A)))
   L <- function(t)diag(exp(c(l1,l2) * t))
-  #P <- eigen.sol$vectors
   P <- cbind(v1,v2)
   deter.P <- P[1,1] * P[2,2] - P[1,2] * P[2,1]
   P.inv <- 1/deter.P * matrix(c(P[2,2],-P[2,1],-P[1,2],P[1,1]),nrow=2)
-  #RY <- function(t) Re(solve(P)%*%L(t)%*%P%*%ry0)
+  #return solution to problem x' = Ax given by
+  # x(t) = exp(At)x(0) = [P*exp(Lambda * t)*P^-1]x(0).
+  # For details, consult an ODE graduate text e.g. Perko.
   RY <- function(t) Re(P%*%L(t)%*%P.inv%*%ry0)
   RY
 }
