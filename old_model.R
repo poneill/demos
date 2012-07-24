@@ -24,6 +24,8 @@ model.old <- function(lambda.r,lambda.y,mu.r,mu.y,q.yr,q.ry){#deprecated
   RY
 }
 
+percent.yellow <- function(RY,t)RY(t)[2]/sum(RY(t))
+
 results.old <- function(lambda.r,lambda.y,mu.r,mu.y,t,rows,cols,row.max,col.max){
   #Return a matrix whose [i,j]th entry contains the proportion of
   #yellow species at time t.  
