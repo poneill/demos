@@ -1,14 +1,14 @@
-model <- function(lambda.r,lambda.y,mu.r,mu.y,q.yr,q.ry){
+model <- function(lambda.r,lambda.y,mu.r,mu.y,tau.yr,tau.ry){
   #Given a list of parameters, return a function RY(t) which returns a
   #column matrix c(R(t),Y(t)) representing the sizes of the
   #sub-populations R and Y at time t.
 
   dr/dt =
                                         #ar + by dy/dt = cr + dy
-  a <- lambda.r - mu.r - q.ry
-  b <- q.yr 
-  c <- q.ry
-  d <- lambda.y - mu.y - q.yr
+  a <- lambda.r - mu.r - tau.ry
+  b <- tau.yr 
+  c <- tau.ry
+  d <- lambda.y - mu.y - tau.yr
   A <- matrix(c(a,c,b,d),nrow=2)
   ## print(A)
   tr <- a + d
@@ -36,9 +36,18 @@ model <- function(lambda.r,lambda.y,mu.r,mu.y,q.yr,q.ry){
 percent.yellow <- function(RY,t)RY(t)[2]/sum(RY(t))
 
 
-results.new <- function(lambda.r,lambda.y,mu.r,mu.y,rows,cols,row.max,col.max){
+results.new <- function(lambda.r,#speciation R
+                        lambda.y,#speciation Y
+                        mu.r,# extinction R
+                        mu.y,# extinction Y
+                        rows,#num rows in matrix
+                        cols,#num cols in matrix
+                        row.max,#maximum value of tau.yr
+                        col.max)#maximum value of tau.ry
+{
   #Return a matrix whose [i,j]th entry contains the proportion of
-  #yellow species at time t.  
+  #yellow species at time t for transition rates tau.yr, tau.ry
+  #determined by i * row.factor, j * col.factor respectively.
   row.factor <- row.max/rows
   col.factor <- col.max/rows
   results <- matrix(nrow=rows,ncol=cols)
@@ -52,14 +61,15 @@ results.new <- function(lambda.r,lambda.y,mu.r,mu.y,rows,cols,row.max,col.max){
   results
 }
 
-lambda.results <- function(mu.r,mu.y,tau.r,tau.y,rows,cols,row.max,col.max){
+lambda.results <- function(mu.r,mu.y,tau.yr,tau.ry,rows,cols,row.max,col.max){
+  #explore parameter space over lambdas 
   row.factor <- row.max/rows
   col.factor <- col.max/rows
   results <- matrix(nrow=rows,ncol=cols)
   for(i in seq(rows)){
     print(i)
     for(j in seq(cols)){
-      RY <- model(i*row.factor,j*col.factor,mu.r,mu.y,tau.r,tau.y)
+      RY <- model(i*row.factor,j*col.factor,mu.r,mu.y,tau.yr,tau.ry)
       percent.yellow(RY,10)
       results[i,j] <- percent.yellow(RY,1)
     }
