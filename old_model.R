@@ -5,6 +5,7 @@
 #of clarity: the original implementation is therefore included as a
 #reference.
 
+oriole.init.state <- c(0,1)
 
 model.old <- function(lambda.r,lambda.y,mu.r,mu.y,q.yr,q.ry){#deprecated
                                         #dr/dt = ar + by
@@ -21,4 +22,21 @@ model.old <- function(lambda.r,lambda.y,mu.r,mu.y,q.yr,q.ry){#deprecated
   P <- eigen.sol$vectors
   RY <- function(t) Re(P%*%L(t)%*%solve(P)%*%ry0)
   RY
+}
+
+results.old <- function(lambda.r,lambda.y,mu.r,mu.y,t,rows,cols,row.max,col.max){
+  #Return a matrix whose [i,j]th entry contains the proportion of
+  #yellow species at time t.  
+  row.factor <- row.max/rows
+  col.factor <- col.max/rows
+  results <- matrix(nrow=rows,ncol=cols)
+  for(i in seq(rows)){
+    print(i)
+    for(j in seq(cols)){
+      RY <- model.old(lambda.r,lambda.y,mu.r,mu.y,i*row.factor,j*col.factor)
+      percent.yellow(RY,10)
+      results[i,j] <- percent.yellow(RY,t)
+    }
+  }
+  results
 }

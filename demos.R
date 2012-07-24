@@ -1,6 +1,10 @@
 model <- function(lambda.r,lambda.y,mu.r,mu.y,q.yr,q.ry){
-                                        #dr/dt = ar + by
-                                        #dy/dt = cr + dy
+  #Given a list of parameters, return a function RY(t) which returns a
+  #column matrix c(R(t),Y(t)) representing the sizes of the
+  #sub-populations R and Y at time t.
+
+  dr/dt =
+                                        #ar + by dy/dt = cr + dy
   a <- lambda.r - mu.r - q.ry
   b <- q.yr 
   c <- q.ry
@@ -28,24 +32,13 @@ model <- function(lambda.r,lambda.y,mu.r,mu.y,q.yr,q.ry){
   RY <- function(t) Re(P%*%L(t)%*%P.inv%*%ry0)
   RY
 }
+
 percent.yellow <- function(RY,t)RY(t)[2]/sum(RY(t))
 
-results.old <- function(lambda.r,lambda.y,mu.r,mu.y,rows,cols,row.max,col.max){
-  row.factor <- row.max/rows
-  col.factor <- col.max/rows
-  results <- matrix(nrow=rows,ncol=cols)
-  for(i in seq(rows)){
-    print(i)
-    for(j in seq(cols)){
-      RY <- model.old(lambda.r,lambda.y,mu.r,mu.y,i*row.factor,j*col.factor)
-      percent.yellow(RY,10)
-      results[i,j] <- percent.yellow(RY,1)
-    }
-  }
-  results
-}
 
 results.new <- function(lambda.r,lambda.y,mu.r,mu.y,rows,cols,row.max,col.max){
+  #Return a matrix whose [i,j]th entry contains the proportion of
+  #yellow species at time t.  
   row.factor <- row.max/rows
   col.factor <- col.max/rows
   results <- matrix(nrow=rows,ncol=cols)
