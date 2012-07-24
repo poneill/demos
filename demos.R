@@ -1,4 +1,4 @@
-model.new <- function(lambda.r,lambda.y,mu.r,mu.y,q.yr,q.ry){
+model <- function(lambda.r,lambda.y,mu.r,mu.y,q.yr,q.ry){
                                         #dr/dt = ar + by
                                         #dy/dt = cr + dy
   a <- lambda.r - mu.r - q.ry
@@ -52,7 +52,7 @@ results.new <- function(lambda.r,lambda.y,mu.r,mu.y,rows,cols,row.max,col.max){
   for(i in seq(rows)){
     print(i)
     for(j in seq(cols)){
-      RY <- model.new(lambda.r,lambda.y,mu.r,mu.y,i*row.factor,j*col.factor)
+      RY <- model(lambda.r,lambda.y,mu.r,mu.y,i*row.factor,j*col.factor)
       results[i,j] <- percent.yellow(RY,.1)
     }
   }
@@ -66,7 +66,7 @@ lambda.results <- function(mu.r,mu.y,tau.r,tau.y,rows,cols,row.max,col.max){
   for(i in seq(rows)){
     print(i)
     for(j in seq(cols)){
-      RY <- model.new(i*row.factor,j*col.factor,mu.r,mu.y,tau.r,tau.y)
+      RY <- model(i*row.factor,j*col.factor,mu.r,mu.y,tau.r,tau.y)
       percent.yellow(RY,10)
       results[i,j] <- percent.yellow(RY,1)
     }
