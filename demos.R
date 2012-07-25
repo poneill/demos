@@ -1,7 +1,7 @@
 debug <- FALSE
-if.debugging <- function(x)ifelse(debug,x,NULL)
-
-model <- function(lambda.r,lambda.y,mu.r,mu.y,tau.yr,tau.ry){
+if.debugging <- function(x)ifelse(debug,x,NA)
+oriole.init.state <- c(0,1)
+model <- function(lambda.r,lambda.y,mu.r,mu.y,tau.yr,tau.ry,init.state){
   #Given a list of parameters, return a function RY(t) which returns a
   #column matrix c(R(t),Y(t)) representing the sizes of the
   #sub-populations R and Y at time t.
@@ -14,7 +14,7 @@ model <- function(lambda.r,lambda.y,mu.r,mu.y,tau.yr,tau.ry){
   A <- matrix(c(a,c,b,d),nrow=2)
                                         #NB: assumes A is non-singular,
                                         #b and c != 0
-  ry0 <- oriole.init.state
+  ry0 <- init.state
   if.debugging(print(A))
   tr <- a + d
   deter <- a*d - b*c
@@ -45,7 +45,8 @@ results.new <- function(lambda.r,#speciation R
                         rows,#num rows in matrix
                         cols,#num cols in matrix
                         row.max,#maximum value of tau.yr
-                        col.max)#maximum value of tau.ry
+                        col.max,#maximum value of tau.ry
+                        t)#time at which to observe system
 {
   #Return a matrix whose [i,j]th entry contains the proportion of
   #yellow species at time t for transition rates tau.yr, tau.ry
@@ -56,8 +57,9 @@ results.new <- function(lambda.r,#speciation R
   for(i in seq(rows)){
     print(i)
     for(j in seq(cols)){
-      RY <- model(lambda.r,lambda.y,mu.r,mu.y,i*row.factor,j*col.factor)
-      results[i,j] <- percent.yellow(RY,.1)
+      print(j)
+      RY <- model(lambda.r,lambda.y,mu.r,mu.y,i*row.factor,j*col.factor,oriole.init.state)
+      results[i,j] <- percent.yellow(RY,t)
     }
   }
   results
@@ -71,7 +73,7 @@ lambda.results <- function(mu.r,mu.y,tau.yr,tau.ry,rows,cols,row.max,col.max){
   for(i in seq(rows)){
     print(i)
     for(j in seq(cols)){
-      RY <- model(i*row.factor,j*col.factor,mu.r,mu.y,tau.yr,tau.ry)
+      RY <- model(i*row.factor,j*col.factor,mu.r,mu.y,tau.yr,tau.ry,oriole.init.state)
       percent.yellow(RY,10)
       results[i,j] <- percent.yellow(RY,1)
     }
