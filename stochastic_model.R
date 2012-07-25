@@ -15,19 +15,18 @@ how.many <- sum
 RED <- 1
 YELLOW <- 2
 NIL <- 0
-#Rates
-q0 <- 1
-q1 <- 10
-lambda <- 10
-mu <- 1
-oriole.reactions <- list(list(c(RED),c(RED,RED),lambda),
-                         list(c(YELLOW),c(YELLOW,YELLOW),lambda),
-                         list(c(YELLOW),c(RED),q0),
-                         list(c(RED),c(YELLOW),q1),
-                         list(c(RED),c(NIL),mu),
-                         list(c(YELLOW),c(NIL),mu))
 oriole.init.state <- c(0,1)
-
+model.stochastic <- function(lambda.r,lambda.y,mu.r,mu.y,tau.yr,tau.ry,init.state){
+  
+  oriole.reactions <- list(list(c(RED),c(RED,RED),lambda.r),
+                           list(c(YELLOW),c(YELLOW,YELLOW),lambda.y),
+                           list(c(YELLOW),c(RED),tau.yr),
+                           list(c(RED),c(YELLOW),tau.ry),
+                           list(c(RED),c(NIL),mu.r),
+                           list(c(YELLOW),c(NIL),mu.y))
+  ry <- function(t)simulate(oriole.reactions,init.state,t)
+  ry
+}
 see <- function(x){print(x)
                    x}
 reagent.coeffs <- function(reaction)reaction[[1]]
@@ -68,7 +67,8 @@ update.state <- function(reactions,state,reaction.index){
   state - delta.reagents + delta.products
 }
 
-simulate <- function(reactions,state,n,mode="time"){
+
+simulate.trajectory <- function(reactions,state,n,mode="time"){
   iter <- c(1,0) #iteration 1, time 0
   if(mode=="time"){
     done.yet <- function(iter)iter[2] > n
@@ -89,4 +89,57 @@ simulate <- function(reactions,state,n,mode="time"){
   }
   trajectory
 
+}
+
+simulate <- function(reactions,state,n,mode="time"){
+  iter <- c(1,0) #iteration 1, time 0
+  if(mode=="time"){
+    done.yet <- function(iter)iter[2] > n
+  }
+  else{
+    done.yet <-function(iter)iter[1] > n
+  }
+  while(!done.yet(iter)){
+    index.and.time <- sample.reaction(reactions,state)
+    reaction.index <- index.and.time[1]
+    reaction.time  <- index.and.time[2]
+    if(reaction.time == Inf)
+      break
+    state <- update.state(reactions,state,reaction.index)
+    iter <- iter + c(1,reaction.time)
+  }
+  state
+}
+
+percent.yellow <- function(state)state[2]/sum(state)
+results.stochastic <- function(lambda.r,#speciation R
+                               lambda.y,#speciation Y
+                               mu.r,# extinction R
+                               mu.y,# extinction Y
+                               rows,#num rows in matrix
+                               cols,#num cols in matrix
+                               row.max,#maximum value of tau.yr
+                               col.max,#maximum value of tau.ry
+                               init.state,#init.state
+                               num.replicates,#of trajectories for each data point
+                               t)#time at which to sample
+{
+  #Return a matrix whose [i,j]th entry contains the proportion of
+  #yellow species at time t for transition rates tau.yr, tau.ry
+  #determined by i * row.factor, j * col.factor respectively.
+  row.factor <- row.max/rows
+  col.factor <- col.max/rows
+  results <- matrix(nrow=rows,ncol=cols)
+  for(i in seq(rows)){
+    print(i)
+    for(j in seq(cols)){
+      replicates <- replicate(num.replicates,
+                              model.stochastic(lambda.r,lambda.y,mu.r,
+                                               mu.y,i*row.factor,j*col.factor,
+                                               init.state)(t))
+      avg.percent.yellow <- mean((apply(replicates,2,percent.yellow)),na.rm=TRUE)
+      results[i,j] <- ifelse(is.na(avg.percent.yellow),avg.percent.yellow,-1)
+    }
+  }
+  results
 }
