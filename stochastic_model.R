@@ -12,7 +12,7 @@
 #the stochiometric vector, hence NIL == 0
 
 how.many <- sum
-
+partials <- function(xs){sapply(1:length(xs),function(i)sum(xs[1:i]))}
 RED <- 1
 YELLOW <- 2
 NIL <- 0
@@ -75,8 +75,7 @@ update.state <- function(reactions,state,reaction.index){
   state - delta.reagents + delta.products
 }
 
-
-simulate.trajectory <- function(reactions,state,n,mode="time"){
+simulate <- function(reactions,state,n,mode="time",trajectory=TRUE){
   iter <- c(1,0) #iteration 1, time 0
   if(mode=="time"){
     done.yet <- function(iter)iter[2] > n
@@ -84,28 +83,8 @@ simulate.trajectory <- function(reactions,state,n,mode="time"){
   else{
     done.yet <-function(iter)iter[1] > n
   }
-  trajectory <- matrix(ncol=length(state) + 1)
-  while(!done.yet(iter)){
-    index.and.time <- sample.reaction(reactions,state)
-    reaction.index <- index.and.time[1]
-    reaction.time  <- index.and.time[2]
-    if(reaction.time == Inf)
-      break
-    state <- update.state(reactions,state,reaction.index)
-    trajectory <- rbind(trajectory,c(state,reaction.time))
-    iter <- iter + c(1,reaction.time)
-  }
-  trajectory
-
-}
-
-simulate <- function(reactions,state,n,mode="time"){
-  iter <- c(1,0) #iteration 1, time 0
-  if(mode=="time"){
-    done.yet <- function(iter)iter[2] > n
-  }
-  else{
-    done.yet <-function(iter)iter[1] > n
+  if(trajectory){
+    traj <- matrix(ncol=length(state) + 1)
   }
   while(!done.yet(iter)){
     index.and.time <- sample.reaction(reactions,state)
@@ -114,9 +93,17 @@ simulate <- function(reactions,state,n,mode="time"){
     if(reaction.time == Inf)
       break
     state <- update.state(reactions,state,reaction.index)
+    if(trajectory){
+      traj <- rbind(traj,c(state,reaction.time))
+    }
     iter <- iter + c(1,reaction.time)
   }
-  state
+  if(trajectory){
+    return(traj)
+  }
+  else{
+    return(state)
+  }
 }
 
 percent.yellow <- function(state)state[2]/sum(state)
