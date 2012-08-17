@@ -5,7 +5,8 @@
 # A model is a list of reactions and an initial state.  A reaction is
 # a list of reactants, a list of products, and a reaction rate.  We
 # assume that the effective rate is proportional to the reaction rate
-# times the product of the abundances of the reactants.
+# times the product of the abundances of the reactants, (unless the
+# reaction is a pure birth reaction (nil -> X)).
 
 #Reactants/products: Value of variable also serves as an index in
 #the stochiometric vector, hence NIL == 0
@@ -39,9 +40,16 @@ reagent.abundances <- function(reaction,state){
 rate <- function(reaction)reaction[[3]]
 
 effective.rates <- function(reactions,state){
-  unlist(lapply(reactions,
-                function(reaction)(prod(reagent.abundances(reaction,state))
-                                   * rate(reaction))))
+  effective.rate <- function(reaction){
+    if(all(reagent.coeffs(reaction)==0)){#if reaction is a pure birth process...
+      rate(reaction) #return the rate
+    }
+    else{#return the stoichiometric product
+      (prod(reagent.abundances(reaction,state))
+       * rate(reaction))
+    }
+  }
+    unlist(lapply(reactions,effective.rate))
 }
 
 safe.rexp <- function(rate){
