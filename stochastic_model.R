@@ -90,8 +90,9 @@ simulate <- function(reactions,state,n,mode="time",trajectory=TRUE){
     index.and.time <- sample.reaction(reactions,state)
     reaction.index <- index.and.time[1]
     reaction.time  <- index.and.time[2]
-    if(reaction.time == Inf)
+    if(reaction.time == Inf){
       break
+    }
     state <- update.state(reactions,state,reaction.index)
     if(trajectory){
       traj <- rbind(traj,c(state,reaction.time))
