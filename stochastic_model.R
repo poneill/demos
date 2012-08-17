@@ -75,29 +75,23 @@ update.state <- function(reactions,state,reaction.index){
   state - delta.reagents + delta.products
 }
 
-simulate <- function(reactions,state,n,mode="time",trajectory=TRUE){
+simulate <- function(reactions,state,max.time,trajectory=TRUE){
   iter <- c(1,0) #iteration 1, time 0
-  if(mode=="time"){
-    done.yet <- function(iter)iter[2] > n
-  }
-  else{
-    done.yet <-function(iter)iter[1] > n
-  }
   if(trajectory){
     traj <- matrix(ncol=length(state) + 1)
   }
-  while(!done.yet(iter)){
+  while(TRUE){
     index.and.time <- sample.reaction(reactions,state)
     reaction.index <- index.and.time[1]
     reaction.time  <- index.and.time[2]
-    if(reaction.time == Inf){
+    iter <- iter + c(1,reaction.time)
+    if(reaction.time == Inf || iter[2] > max.time){
       break
     }
     state <- update.state(reactions,state,reaction.index)
     if(trajectory){
-      traj <- rbind(traj,c(state,reaction.time))
+      traj <- rbind(traj,c(state,iter[2]))
     }
-    iter <- iter + c(1,reaction.time)
   }
   if(trajectory){
     return(traj)
