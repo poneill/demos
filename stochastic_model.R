@@ -3,10 +3,23 @@
 
 
 # A model is a list of reactions and an initial state.  A reaction is
-# a list of reactants, a list of products, and a reaction rate.  We
-# assume that the effective rate is proportional to the reaction rate
-# times the product of the abundances of the reactants, (unless the
-# reaction is a pure birth reaction (nil -> X)).
+# a list of (1) a vector of reactants, (2) a vector of products, and
+# (3) a reaction rate constant.  We assume that the effective rate is given by
+# mass-action kinetics, i.e. that for a reaction of the form:
+
+# v_1A_1 + v_2A_2 + ... + v_1A_n -> ...
+
+# with reaction constant k, where species A_i has copy number x_i,
+
+# the effective rate is given by:
+
+# lambda = k\prod_{i=1}^nv_i!{x_i\choose v_i}
+
+# Note that this formulation includes pure birth and pure death
+# processes as well.  Reactions involving multiple copies of a given
+# species must be expressed as:
+
+# list(c(X,X,X,Y,Y)) &c.
 
 #Reactants/products: Value of variable also serves as an index in
 #the stochiometric vector, hence NIL == 0
@@ -17,6 +30,7 @@ RED <- 1
 YELLOW <- 2
 NIL <- 0
 oriole.init.state <- c(0,1)
+
 model.stochastic <- function(lambda.r,lambda.y,mu.r,mu.y,tau.yr,tau.ry,init.state){
   
   oriole.reactions <- list(list(c(RED),c(RED,RED),lambda.r),
