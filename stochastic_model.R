@@ -84,6 +84,7 @@ reduce.enzymatic.reactions <- function(hr.model){
 explicit.model <- function(hr.model){
   #Given a model description in human readable format
   #(e.g. oriole.reactions), expand full stochiometric vectors
+  hr.model <- reduce.enzymatic.reactions(hr.model)
   state <- 1:state.length(hr.model)
   lapply(hr.model,function(reaction)(list(to.stoich(reaction,state),
                                                reaction[[3]])))
@@ -99,7 +100,7 @@ model.stochastic <- function(lambda.r,lambda.y,mu.r,mu.y,tau.yr,tau.ry,init.stat
                            list(c(RED),c(YELLOW),tau.ry),
                            list(c(RED),c(NIL),mu.r),
                            list(c(YELLOW),c(NIL),mu.y))
-  ry <- function(t)simulate(oriole.reactions,init.state,t)
+  ry <- function(t)simulate(explicit.model(oriole.reactions),init.state,t)
   ry
 }
 see <- function(x){print(x)
