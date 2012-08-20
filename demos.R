@@ -1,6 +1,17 @@
 debug <- FALSE
 if.debugging <- function(x)ifelse(debug,x,NA)
 oriole.init.state <- c(0,1)
+### Data from Nick Friedman Mon Aug 20 17:58:31 EDT 2012
+
+red.counts <- 12
+yellow.counts <- 88
+#lambda <- 1.72 #units 1/(m.y.)
+#mu <- 1.43 #(but this seems suspect to me N.F.)
+lambda <- 5.673889e-01 #revised Mon Aug 20 18:52:38 EDT 2012
+mu <- 1.013279e-07
+tau.yr <- 0.084
+tau.ry <- 0.195
+###
 model <- function(lambda.r,lambda.y,mu.r,mu.y,tau.yr,tau.ry,init.state){
   #Given a list of parameters, return a function RY(t) which returns a
   #column matrix c(R(t),Y(t)) representing the sizes of the
