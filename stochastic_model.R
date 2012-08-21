@@ -100,7 +100,7 @@ model.stochastic <- function(lambda.r,lambda.y,mu.r,mu.y,tau.yr,tau.ry,init.stat
                            list(c(RED),c(YELLOW),tau.ry),
                            list(c(RED),c(NIL),mu.r),
                            list(c(YELLOW),c(NIL),mu.y))
-  ry <- function(t)simulate(explicit.model(oriole.reactions),init.state,t)
+  ry <- function(t)simulate(oriole.reactions,init.state,t)
   ry
 }
 see <- function(x){print(x)
@@ -120,13 +120,13 @@ stoich.from <- function(reaction){
   reaction[[1]]
 }
 rate.from <- function(reaction){
-  reaction[[2]]
+  reaction[[3]]
 }
 
 effective.rate <- function(reaction,state){
-    stoich.vec <- stoich.from(reaction)
-    rate <- rate.from(reaction)
-    stoichs <- -sapply(stoich.vec,function(x)min(x,0))
+  reagents <- reagent.complex(reaction)
+  stoichs <- stoich.coeffs(reagents,state)
+  rate <- rate.from(reaction)
     rate * prod(factorial(stoichs) * choose(state,stoichs))
     }
 
@@ -149,12 +149,14 @@ sample.reaction <- function(reactions,state){
 update.state <- function(reactions,state,reaction.index){
   #Given a reaction model, a state and the next index (first argument
   #of return from sample.reaction, return an updated state vector)
-  reaction <- stoich.from(reactions[[reaction.index]])
-  ## reagents <- reagent.complex(reaction)
-  ## products <- product.complex(reaction)
-  ## delta.reagents <- sapply(1:length(state),function(i)how.many(reagents == i))
-  ## delta.products <- sapply(1:length(state),function(i)how.many(products == i))
-  state + reaction
+  #reaction <- stoich.from(reactions[[reaction.index]])
+  reaction <- reactions[[reaction.index]]
+  reagents <- reagent.complex(reaction)
+  products <- product.complex(reaction)
+  n <- length(state)
+  delta.reagents <- sapply(1:n,function(i)how.many(reagents == i))
+  delta.products <- sapply(1:n,function(i)how.many(products == i))
+  state + delta.products-delta.reagents
 }
 
 simulate <- function(reactions,state,max.time,trajectory=TRUE){

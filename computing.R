@@ -69,6 +69,7 @@ copy.reactions <- function(){
        list(c(a.prime.ab,a.prime.ab),c(a.prime.ab),fast),
        list(c(g.ab,a.prime.ab),c(done),slow),#send done signal
        list(c(nil),c(done.ab),slow),#maintenace for done
+       list(c(done,done),c(done),fast),
        list(c(done,done.ab),c(done),fast),
        list(c(done.ab,done.ab),c(done.ab),fast)
        )
